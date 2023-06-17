@@ -291,29 +291,31 @@ int thread_fn(void* v)
 
         for(y=0 ; y < 240 ; y++)
         {
+            hasChanged = false;
             for(x=0 ; x<400 ; x++)
             {
-                hasChanged = false;
                 memset(c, 0, sizeof(c));
                 
-                p = ioread8((void*)((uintptr_t)info->fix.smem_start + (x + y*400)));
+                // get current pseudocolor (8 bit) pixel
+                p = ioread8((void*)((uintptr_t)info->fix.smem_start + (x + y * 400)));
                 
-                    // Extract the red, green, and blue values for the current pixel
+                // Extract the red, green, and blue values for the current pixel
                 r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
                 g = (p & 0b00111000) > 0 ? 1 : 0;  // Bit 3-5 for green
                 b = (p & 0b11000000) > 0 ? 1 : 0;  // Bit 6-7 for blue
                 
                 // Compare pixel p to buffer 
-                if (r != (screenBuffer[2 + (x + y * (400 + 4))]) || 
-                    g != (screenBuffer[2 + (x + y * (400 + 4))] + 1) ||
-                    b != (screenBuffer[2 + (x + y * (400 + 4))] + 2))
+                if (r != screenBuffer[(2 + x + y * 150 + 4) * 8] || 
+                    g != screenBuffer[(2 + x + y * 150 + 4) * 8 + 1] ||
+                    b != screenBuffer[(2 + x + y * 150 + 4) * 8 + 2])
                 {
+                    // flag that line needs to be redrawn to screen
                     hasChanged = true;
                     
                     // Write r, g, b sub-pixels to the screenbuffer
-                    screenBuffer[2 + (x + y * (400 + 4))] = r;
-                    screenBuffer[2 + (x + y * (400 + 4))] = g;
-                    screenBuffer[2 + (x + y * (400 + 4))] = b;
+                    screenBuffer[(2 + x + y * 150 + 4) * 8] = r;
+                    screenBuffer[(2 + x + y * 150 + 4) * 8 + 1] = g;
+                    screenBuffer[(2 + x + y * 150 + 4) * 8 + 2] = b;
                 }
             }
   
