@@ -262,9 +262,9 @@ int thread_fn(void* v)
     char c[3]; // reduced to 8 x 3 bit pixels as 3 bytes
     // int shift;
     // uint24_t c;
-    char hasChanged = 0;
+    bool hasChanged = false;
 
-    unsigned char *screenBuffer;
+    unsigned char *screenBuffer; 
 
     clearDisplay();
 
@@ -291,53 +291,29 @@ int thread_fn(void* v)
 
         for(y=0 ; y < 240 ; y++)
         {
-            hasChanged = 0;
-
-            for(x=0 ; x<50 ; x++)
+            for(x=0 ; x<400 ; x++)
             {
-                // We work on 8 pixels at a time... 50 * 8 => 400 pixels
-
-                // Each 8 pixels compress indo 3 byte c[] and are copied to the screenBuffer.
-
+                hasChanged = false;
                 memset(c, 0, sizeof(c));
 
-                // Iterate over 8 pixels
-                for (i = 0; i < 8; i++) {
-                    p = ioread8((void*)((uintptr_t)info->fix.smem_start + (x*8 + i + y*400)));
+                p = ioread8((void*)((uintptr_t)info->fix.smem_start + (x + y*400)));
+
+                // Compare pixel p to buffer 
+                if p != screenBuffer[2 + (x + y * (400 + 4)]{
+                    hasChanged = true;
 
                     // Extract the red, green, and blue values for the current pixel
                     r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
                     g = (p & 0b00111000) > 0 ? 1 : 0;  // Bit 3-5 for green
                     b = (p & 0b11000000) > 0 ? 1 : 0;  // Bit 6-7 for blue
-
-                    // // Pack the extracted bits into c
-                    //c[i % 3] |= (r << (i/3));  // Pack red bits
-                    //c[(i*8+1) % 24] |= (g << (i/3 + 1));  // Pack green bits
-                    //c[(i*8+2) % 24] |= (b << (i/3 + 2));  // Pack blue bits
-
-                    // p = r + g + b;
-                    // // c[i % 3] |= p << ((i % 3) * 3);
-                    // c[(8*i)]
-                //}
-
-                // compare to screen buffer
-                //if(!hasChanged && (
-                //        screenBuffer[2 + x*3 + y*(150+4)] != r ||
-                //        screenBuffer[2 + x*3 + 1 + y*(150+4)] != g ||
-                //        screenBuffer[2 + x*3 + 2 + y*(150+4)] != b))
-                //{
-                //    hasChanged = 1;
-                //}
-
-                // update screen buffer
-                //if (hasChanged)
-                //{
-                    screenBuffer[2 + x*3 + y*(150+4)] = r;
-                    screenBuffer[2 + x*3 + 1 + y*(150+4)] = g;
-                    screenBuffer[2 + x*3 + 2 + y*(150+4)] = b;
+                    
+                    // Write r, g, b sub-pixels to the screenbuffer
+                    screenBuffer[(2 + (x + y * (50 + 4)) * 8] = r;
+                    screenBuffer[(2 + (x + y * (50 + 4)) * 8 + 1] = g;
+                    screenBuffer[(2 + (x + y * (50 + 4)) * 8 + 2] = b;
                 }
             }
-
+  
             if (hasChanged)
             {
                 gpio_set_value(SCS, 1);
