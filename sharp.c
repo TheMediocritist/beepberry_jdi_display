@@ -256,7 +256,7 @@ int fpsThreadFunction(void* v)
 int thread_fn(void* v) 
 {
     //BELOW, 50 becomes 150 becaues we have 3 bits (rgb) per pixel
-    int x,y;
+    int x,y, i;
     char r, g, b;
     char p;
     char c[3]; // reduced to 8 x 3 bit pixels as 3 bytes
@@ -302,7 +302,7 @@ int thread_fn(void* v)
                 memset(c, 0, sizeof(c));
 
                 // Iterate over 8 pixels
-                for (int i = 0; i < 8; i++) {
+                for (i = 0; i < 8; i++) {
                     p = ioread8((void*)((uintptr_t)info->fix.smem_start + (x*8 + i + y*400)));
 
                     // Extract the red, green, and blue values for the current pixel
