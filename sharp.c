@@ -256,7 +256,7 @@ int fpsThreadFunction(void* v)
 int thread_fn(void* v) 
 {
     //BELOW, 50 becomes 150 becaues we have 3 bits (rgb) per pixel
-    int x,y, i;
+    int x,y;
     char r, g, b;
     char p;
     char c[3]; // reduced to 8 x 3 bit pixels as 3 bytes
@@ -295,22 +295,25 @@ int thread_fn(void* v)
             {
                 hasChanged = false;
                 memset(c, 0, sizeof(c));
-
+                
                 p = ioread8((void*)((uintptr_t)info->fix.smem_start + (x + y*400)));
-
-                // Compare pixel p to buffer 
-                if p != screenBuffer[2 + (x + y * (400 + 4)]{
-                    hasChanged = true;
-
+                
                     // Extract the red, green, and blue values for the current pixel
-                    r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
-                    g = (p & 0b00111000) > 0 ? 1 : 0;  // Bit 3-5 for green
-                    b = (p & 0b11000000) > 0 ? 1 : 0;  // Bit 6-7 for blue
+                r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
+                g = (p & 0b00111000) > 0 ? 1 : 0;  // Bit 3-5 for green
+                b = (p & 0b11000000) > 0 ? 1 : 0;  // Bit 6-7 for blue
+                
+                // Compare pixel p to buffer 
+                if (r != (screenBuffer[2 + (x + y * (400 + 4))]) || 
+                    g != (screenBuffer[2 + (x + y * (400 + 4))] + 1) ||
+                    b != (screenBuffer[2 + (x + y * (400 + 4))] + 2))
+                {
+                    hasChanged = true;
                     
                     // Write r, g, b sub-pixels to the screenbuffer
-                    screenBuffer[(2 + (x + y * (50 + 4)) * 8] = r;
-                    screenBuffer[(2 + (x + y * (50 + 4)) * 8 + 1] = g;
-                    screenBuffer[(2 + (x + y * (50 + 4)) * 8 + 2] = b;
+                    screenBuffer[2 + (x + y * (400 + 4))] = r;
+                    screenBuffer[2 + (x + y * (400 + 4))] = g;
+                    screenBuffer[2 + (x + y * (400 + 4))] = b;
                 }
             }
   
