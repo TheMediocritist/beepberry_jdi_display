@@ -277,6 +277,7 @@ int thread_fn(void* v)
 	gpio_set_value(SCS, 1);
     screenBuffer[y*(150+4)] = commandByte;
 	screenBuffer[y*(150+4) + 1] = y; //reverseByte(y+1); //sharp display lines are indexed from 1
+    screenBuffer[y*(150+4) + 2] = 152;
 	screenBuffer[y*(150+4) + 152] = paddingByte;
 	screenBuffer[y*(150+4) + 153] = paddingByte;
 
@@ -301,9 +302,9 @@ int thread_fn(void* v)
                 p = ioread8((void*)((uintptr_t)info->fix.smem_start + (x + y * 400)));
                 
                 // Extract the red, green, and blue values for the current pixel
-                r = (p & 0x07) >= threshold ? 1 : 0;  // Bits 0-2 for red
-                g = ((p & 0x38) >> 3) >= threshold ? 1 : 0;  // Bits 3-5 for green (shifted 3 positions to the right)
-                b = ((p & 0xC0) >> 6) >= threshold ? 1 : 0;  // Bits 6-7 for blue (shifted 6 positions to the right)
+                r = 1;//(p & 0x07) >= threshold ? 1 : 0;  // Bits 0-2 for red
+                g = 0;//((p & 0x38) >> 3) >= threshold ? 1 : 0;  // Bits 3-5 for green (shifted 3 positions to the right)
+                b = 1;//((p & 0xC0) >> 6) >= threshold ? 1 : 0;  // Bits 6-7 for blue (shifted 6 positions to the right)
                 
                 // Compare pixel p to buffer 
                 //if (r != screenBuffer[(2 + x + y * 150 + 4) * 8] || 
@@ -311,7 +312,7 @@ int thread_fn(void* v)
                 //    b != screenBuffer[(2 + x + y * 150 + 4) * 8 + 2])
                 //{
                     // flag that line needs to be redrawn to screen
-                    hasChanged = true;
+                    //hasChanged = true;
                     
                     // Write r, g, b sub-pixels to the screenbuffer
                     screenBuffer[(2 + y * 150 + 4) * 8 + (x * 3)] = r;
@@ -320,12 +321,12 @@ int thread_fn(void* v)
                 //}
             }
   
-            if (hasChanged)
-            {
+            //if (hasChanged)
+            //{
                 gpio_set_value(SCS, 1);
                 spi_write(screen->spi, (const u8 *)(screenBuffer+(y*(150+4))), 154);
                 gpio_set_value(SCS, 0);
-            }
+            //}
         }
     }
 
