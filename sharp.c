@@ -52,12 +52,12 @@ char vcomState;
 
 struct sharp {
     struct spi_device	*spi;
-	int			id;
+    int			id;
     char			name[sizeof("sharp-3")];
 
     struct mutex		mutex;
-	struct work_struct	work;
-	spinlock_t		lock;
+    struct work_struct	work;
+    spinlock_t		lock;
 };
 
 struct sharp   *screen;
@@ -247,8 +247,8 @@ int fpsThreadFunction(void* v)
     while (!kthread_should_stop()) 
     {
         msleep(5000);
-    	printk(KERN_DEBUG "FPS sharp : %d\n", fpsCounter);
-    	fpsCounter = 0;
+        printk(KERN_DEBUG "FPS sharp : %d\n", fpsCounter);
+        fpsCounter = 0;
     }
     return 0;
 }
@@ -256,16 +256,15 @@ int fpsThreadFunction(void* v)
 int thread_fn(void* v) 
 {
     //BELOW, 50 becomes 150 becaues we have 3 bits (rgb) per pixel
-    const int threshold = 128;  // Half of the maximum value (assuming 8-bit color)
     int x,y;
     char r, g, b;
     char p;
     char c[3]; // reduced to 8 x 3 bit pixels as 3 bytes
     // int shift;
     // uint24_t c;
-    bool hasChanged = false;
+    char hasChanged = 0;
 
-    unsigned char *screenBuffer; 
+    unsigned char *screenBuffer;
 
     clearDisplay();
 
@@ -274,59 +273,85 @@ int thread_fn(void* v)
     // Init screen to black
     for(y=0 ; y < 240 ; y++)
     {
-	gpio_set_value(SCS, 1);
+    gpio_set_value(SCS, 1);
     screenBuffer[y*(150+4)] = commandByte;
-	screenBuffer[y*(150+4) + 1] = y; //reverseByte(y+1); //sharp display lines are indexed from 1
-    screenBuffer[y*(150+4) + 2] = 152;
-	screenBuffer[y*(150+4) + 152] = paddingByte;
-	screenBuffer[y*(150+4) + 153] = paddingByte;
+    screenBuffer[y*(150+4) + 1] = y; //reverseByte(y+1); //sharp display lines are indexed from 1
+    screenBuffer[y*(150+4) + 152] = paddingByte;
+    screenBuffer[y*(150+4) + 153] = paddingByte;
 
-	//screenBuffer is all to 0 by default (vzalloc)
+    //screenBuffer is all to 0 by default (vzalloc)
     spi_write(screen->spi, (const u8 *)(screenBuffer+(y*(150+4))), 154);
-	gpio_set_value(SCS, 0);
+    gpio_set_value(SCS, 0);
     }
 
 
     while (!kthread_should_stop()) 
     {
-        msleep(10);
+        msleep(50);
 
         for(y=0 ; y < 240 ; y++)
         {
-            hasChanged = false;
-            for(x=0 ; x<400 ; x++)
+            hasChanged = 0;
+
+            for(x=0 ; x<50 ; x++)
             {
+                // We work on 8 pixels at a time... 50 * 8 => 400 pixels
+
+                // Each 8 pixels compress indo 3 byte c[] and are copied to the screenBuffer.
+
                 memset(c, 0, sizeof(c));
-                
-                // get current pseudocolor (8 bit) pixel
-                p = ioread8((void*)((uintptr_t)info->fix.smem_start + (x + y * 400)));
-                
-                // Extract the red, green, and blue values for the current pixel
-                r = 1;//(p & 0x07) >= threshold ? 1 : 0;  // Bits 0-2 for red
-                g = 0;//((p & 0x38) >> 3) >= threshold ? 1 : 0;  // Bits 3-5 for green (shifted 3 positions to the right)
-                b = 1;//((p & 0xC0) >> 6) >= threshold ? 1 : 0;  // Bits 6-7 for blue (shifted 6 positions to the right)
-                
-                // Compare pixel p to buffer 
-                //if (r != screenBuffer[(2 + x + y * 150 + 4) * 8] || 
-                //    g != screenBuffer[(2 + x + y * 150 + 4) * 8 + 1] ||
-                //    b != screenBuffer[(2 + x + y * 150 + 4) * 8 + 2])
-                //{
-                    // flag that line needs to be redrawn to screen
-                    //hasChanged = true;
-                    
-                    // Write r, g, b sub-pixels to the screenbuffer
-                    screenBuffer[(2 + y * 150 + 4) * 8 + (x * 3)] = r;
-                    screenBuffer[(2 + y * 150 + 4) * 8 + (x * 3) + 1] = g;
-                    screenBuffer[(2 + y * 150 + 4) * 8 + (x * 3) + 2] = b;
-                //}
+
+                // Iterate over 8 pixels
+                for (int i = 0; i < 8; i++) {
+                    p = ioread8((void*)((uintptr_t)info->fix.smem_start + (x*8 + i + y*400)));
+
+                    // Extract the red, green, and blue values for the current pixel
+                    r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
+                    g = (p & 0b00111000) > 0 ? 1 : 0;  // Bit 3-5 for green
+                    b = (p & 0b11000000) > 0 ? 1 : 0;  // Bit 6-7 for blue
+
+                    // // Pack the extracted bits into c
+                    // c[i % 3] |= (r << (i % 3));  // Pack red bits
+                    // c[i % 3] |= (g << (i % 3 + 1));  // Pack green bits
+                    // c[i % 3] |= (b << (i % 3 + 2));  // Pack blue bits
+                    c[i*3] |= (r << (i/3));  // Pack red bits
+                    c[(i*3+1) |= (g << (i/3 + 1));  // Pack green bits
+                    c[(i*3+2) |= (b << (i/3 + 2));  // Pack blue bits
+
+                    // // Above steps are broken.  Trying again.
+                    // r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
+                    // g = (p & 0b00111000) > 0 ? 2 : 0;  // Bit 3-5 for green
+                    // b = (p & 0b11000000) > 0 ? 4 : 0;  // Bit 6-7 for blue
+
+                    // p = r + g + b;
+                    // // c[i % 3] |= p << ((i % 3) * 3);
+                    // c[(8*i)]
+                }
+
+                // compare to screen buffer
+                if(!hasChanged && (
+                        screenBuffer[2 + x*3 + y*(150+4)] != c[0] ||
+                        screenBuffer[2 + x*3 + 1 + y*(150+4)] != c[1] ||
+                        screenBuffer[2 + x*3 + 2 + y*(150+4)] != c[2]))
+                {
+                    hasChanged = 1;
+                }
+
+                // update screen buffer
+                if (hasChanged)
+                {
+                    screenBuffer[2 + x*3 + y*(150+4)] = c[0];
+                    screenBuffer[2 + x*3 + 1 + y*(150+4)] = c[1];
+                    screenBuffer[2 + x*3 + 2 + y*(150+4)] = c[2];
+                }
             }
-  
-            //if (hasChanged)
-            //{
+
+            if (hasChanged)
+            {
                 gpio_set_value(SCS, 1);
                 spi_write(screen->spi, (const u8 *)(screenBuffer+(y*(150+4))), 154);
                 gpio_set_value(SCS, 0);
-            //}
+            }
         }
     }
 
@@ -340,14 +365,14 @@ static int sharp_probe(struct spi_device *spi)
     char thread_fps[] = "fpsThread";
     int retval;
 
-	screen = devm_kzalloc(&spi->dev, sizeof(*screen), GFP_KERNEL);
-	if (!screen)
-		return -ENOMEM;
+    screen = devm_kzalloc(&spi->dev, sizeof(*screen), GFP_KERNEL);
+    if (!screen)
+        return -ENOMEM;
 
-	spi->bits_per_word  = 8;
-	spi->max_speed_hz   = 2000000;
+    spi->bits_per_word  = 8;
+    spi->max_speed_hz   = 2000000;
 
-	screen->spi	= spi;
+    screen->spi	= spi;
 
     spi_set_drvdata(spi, screen);
 
@@ -421,27 +446,27 @@ err:
     return 0;
 }
 
-static int sharp_remove(struct spi_device *spi)
+static void sharp_remove(struct spi_device *spi)
 {
         if (info) {
                 unregister_framebuffer(info);
                 fb_dealloc_cmap(&info->cmap);
                 framebuffer_release(info);
         }
-	kthread_stop(thread1);
-	kthread_stop(fpsThread);
+    kthread_stop(thread1);
+    kthread_stop(fpsThread);
     kthread_stop(vcomToggleThread);
-	printk(KERN_CRIT "out of screen module");
-	return 0;
+    printk(KERN_CRIT "out of screen module");
+    //return 0;
 }
 
 static struct spi_driver sharp_driver = {
     .probe          = sharp_probe,
     .remove         = sharp_remove,
-	.driver = {
-		.name	= "sharp",
-		.owner	= THIS_MODULE,
-	},
+    .driver = {
+        .name	= "sharp",
+        .owner	= THIS_MODULE,
+    },
 };
 
 module_spi_driver(sharp_driver);
