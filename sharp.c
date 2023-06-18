@@ -256,6 +256,7 @@ int fpsThreadFunction(void* v)
 int thread_fn(void* v) 
 {
     //BELOW, 50 becomes 150 becaues we have 3 bits (rgb) per pixel
+    const int threshold = 128;  // Half of the maximum value (assuming 8-bit color)
     int x,y;
     char r, g, b;
     char p;
@@ -300,9 +301,9 @@ int thread_fn(void* v)
                 p = ioread8((void*)((uintptr_t)info->fix.smem_start + (x + y * 400)));
                 
                 // Extract the red, green, and blue values for the current pixel
-                r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
-                g = (p & 0b00111000) > 0 ? 1 : 0;  // Bit 3-5 for green
-                b = (p & 0b11000000) > 0 ? 1 : 0;  // Bit 6-7 for blue
+                r = (p & 0x07) >= threshold ? 1 : 0;  // Bits 0-2 for red
+                g = ((p & 0x38) >> 3) >= threshold ? 1 : 0;  // Bits 3-5 for green (shifted 3 positions to the right)
+                b = ((p & 0xC0) >> 6) >= threshold ? 1 : 0;  // Bits 6-7 for blue (shifted 6 positions to the right)
                 
                 // Compare pixel p to buffer 
                 if (r != screenBuffer[(2 + x + y * 150 + 4) * 8] || 
