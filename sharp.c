@@ -27,10 +27,12 @@
     Referencing JDI_MIP_Display.cpp for hints on
     what needs to be changed.*/
 
-char commandByte = 0b10000000;
+char commandByte    = 0b10000000;
 // char vcomByte    = 0b01000000;
-char clearByte   = 0b00100000;
-char paddingByte = 0b00000000;
+char clearByte      = 0b00100000;
+char paddingByte    = 0b00000000;
+char 4bitWriteLine  = 0b10010000;
+char 3bitWriteLine  = 0b10000000;
 
  char DISP       = 22;
  char SCS        = 8;
@@ -254,8 +256,10 @@ int fpsThreadFunction(void* v)
 int thread_fn(void* v) 
 {
     //BELOW, 50 becomes 150 becaues we have 3 bits (rgb) per pixel
-    int x,y, i;
+    uint_8 x, y, i;
     char r, g, b;
+    uint_8 rByte, gByte, bByte;
+    uint_8 rBit, gBit, bBit;
     char p;
     char c[3]; // reduced to 8 x 3 bit pixels as 3 bytes
     // int shift;
@@ -309,14 +313,32 @@ int thread_fn(void* v)
                     //b = (p & 0b11000000) > 0 ? 1 : 0;  // Bit 6-7 for blue
 
                     // Extract the red, green, and blue values for the current pixel
-                    r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
-                    g = ((p & 0b00111000) >> 3) > 0 ? 1 : 0;  // Bit 3-5 for green
-                    b = ((p & 0b11000000) >> 6) > 0 ? 1 : 0;  // Bit 6-7 for blue
+                    //r = (p & 0b00000111) * 36;          // Bit 0-2 for red (0-7 scaled to 0-252)
+                    //g = ((p & 0b00111000) >> 3) * 36;   // Bit 3-5 for green (0-7 scaled to 0-252)
+                    //b = ((p & 0b11000000) >> 6) * 85;   // Bit 6-7 for blue (0-3 scaled to 0-255)
+                    r = (p & 0x07) * 36;                // Bit 0-2 for red (0-7 scaled to 0-252)
+                    g = ((p & 0x38) >> 3) * 36;         // Bit 3-5 for green (0-7 scaled to 0-252)
+                    b = ((p & 0xC0) >> 6) * 85;         // Bit 6-7 for blue (0-3 scaled to 0-255)
+                    
+                    // index bytes
+                    rByte = (x+3)/8;
+                    gByte = (x+3+1)/8;
+                    bByte = (x+3+2)/8;
+                    
+                    //index bits
+                    rBit = (x+3) % 8;
+                    gBit = (x+3+1) % 8;
+                    bBit = (x+3+2) % 8;
                     
                     // Pack the red, green, and blue bits into the c byte array
-                    c[(x+3+0)/8] |= (r << (7 - ((x+3+0)%8)));  // Pack red bits
-                    c[(x+3+1)/8] |= (g << (7 - ((x+3+1)%8)));  // Pack green bits
-                    c[(x+3+2)/8] |= (b << (7 - ((x+3+2)%8)));  // Pack blue bits
+                    c[rByte] |= (r << (7 - rBit));  // Pack red bit
+                    c[gByte] |= (g << (7 - gBit));  // Pack green bit
+                    c[bByte] |= (b << (7 - bBit));  // Pack blue bit   
+                    
+                    // Pack the red, green, and blue bits into the c byte array
+                    //c[(x+3+0)/8] |= (r << (7 - ((x+3+0)%8)));  // Pack red bits
+                    //c[(x+3+1)/8] |= (g << (7 - ((x+3+1)%8)));  // Pack green bits
+                    //c[(x+3+2)/8] |= (b << (7 - ((x+3+2)%8)));  // Pack blue bits
                 }
 
                 // compare to screen buffer
