@@ -446,7 +446,7 @@ err:
     return 0;
 }
 
-static void sharp_remove(struct spi_device *spi)
+static int sharp_remove(struct spi_device *spi)
 {
         if (info) {
                 unregister_framebuffer(info);
@@ -457,7 +457,7 @@ static void sharp_remove(struct spi_device *spi)
     kthread_stop(fpsThread);
     kthread_stop(vcomToggleThread);
     printk(KERN_CRIT "out of screen module");
-    //return 0;
+    return 0;
 }
 
 static struct spi_driver sharp_driver = {
