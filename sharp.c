@@ -307,18 +307,18 @@ int thread_fn(void* v)
                     g = (p & 0b00111000) > 0 ? 1 : 0;  // Bit 3-5 for green
                     b = (p & 0b11000000) > 0 ? 1 : 0;  // Bit 6-7 for blue
 
-                    // // Pack the extracted bits into c
-                    //c[i % 3] |= (r << (i/3));  // Pack red bits
-                    //c[(i*8+1) % 24] |= (g << (i/3 + 1));  // Pack green bits
-                    //c[(i*8+2) % 24] |= (b << (i/3 + 2));  // Pack blue bits
+                    // Pack the extracted bits into c
+                    c[i % 3] |= (r << (i/3));  // Pack red bits
+                    c[(i*8+1) % 24] |= (g << (i/3 + 1));  // Pack green bits
+                    c[(i*8+2) % 24] |= (b << (i/3 + 2));  // Pack blue bits
                     
-                    int red_position = i * 3;
-                    int green_position = i * 3 + 1;
-                    int blue_position = i * 3 + 2;
+                    //int red_position = i * 3;
+                    //int green_position = i * 3 + 1;
+                    //int blue_position = i * 3 + 2;
                     
-                    c[red_position % 24] |= (r << (i / 3));  // Pack red bits
-                    c[green_position % 24] |= (g << (i / 3 + 1));  // Pack green bits
-                    c[blue_position % 24] |= (b << (i / 3 + 2));  // Pack blue bits
+                    //c[red_position % 24] |= (r << (i / 3));  // Pack red bits
+                    //c[green_position % 24] |= (g << (i / 3 + 1));  // Pack green bits
+                    //c[blue_position % 24] |= (b << (i / 3 + 2));  // Pack blue bits
                 }
 
                 // compare to screen buffer
