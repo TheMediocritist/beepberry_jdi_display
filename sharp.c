@@ -308,34 +308,15 @@ int thread_fn(void* v)
                     //g = (p & 0b00111000) > 0 ? 1 : 0;  // Bit 3-5 for green
                     //b = (p & 0b11000000) > 0 ? 1 : 0;  // Bit 6-7 for blue
 
-                    // // Pack the extracted bits into c
+                    // Extract the red, green, and blue values for the current pixel
                     r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
                     g = ((p & 0b00111000) >> 3) > 0 ? 1 : 0;  // Bit 3-5 for green
                     b = ((p & 0b11000000) >> 6) > 0 ? 1 : 0;  // Bit 6-7 for blue
                     
-                    // Calculate the index of the byte and the bit position within the byte
-                    int byteIndex = (i * 3) / 8;
-                    int bitPosition = (i * 3) % 8;
-                    
                     // Pack the red, green, and blue bits into the c byte array
-                    c[byteIndex] |= (r << (7 - bitPosition));  // Pack red bits
-                    c[byteIndex + 1] |= (g << (7 - (bitPosition + 1)));  // Pack green bits
-                    c[byteIndex + 1] |= (b << (7 - (bitPosition + 2)));  // Pack blue bits
-                    // c[i % 3] |= (r << (i % 3));  // Pack red bits
-                    // c[i % 3] |= (g << (i % 3 + 1));  // Pack green bits
-                    // c[i % 3] |= (b << (i % 3 + 2));  // Pack blue bits
-                    //c[i % 3] |= (r << (i/3));  // Pack red bits
-                    //c[(i*8+1) % 24] |= (g << (i/3 + 1));  // Pack green bits
-                    //c[(i*8+2) % 24] |= (b << (i/3 + 2));  // Pack blue bits
-
-                    // // Above steps are broken.  Trying again.
-                    // r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
-                    // g = (p & 0b00111000) > 0 ? 2 : 0;  // Bit 3-5 for green
-                    // b = (p & 0b11000000) > 0 ? 4 : 0;  // Bit 6-7 for blue
-
-                    // p = r + g + b;
-                    // // c[i % 3] |= p << ((i % 3) * 3);
-                    // c[(8*i)]
+                    c[(x+3+0)/8] |= (r << (7 - ((x+3+0)/)));  // Pack red bits
+                    c[(x+3+1)/8] |= (g << (7 - ((x+3+1)/)));  // Pack green bits
+                    c[(x+3+2)/8] |= (b << (7 - ((x+3+2)/)));  // Pack blue bits
                 }
 
                 // compare to screen buffer
