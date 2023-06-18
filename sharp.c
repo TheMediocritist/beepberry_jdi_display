@@ -308,14 +308,14 @@ int thread_fn(void* v)
                     b = ((p & 0b11000000) >> 6) > 0 ? 1 : 0;  // Bit 6-7 for blue
 
                     // Calculate the index of the byte and the bit position within the byte
-                    int byteIndex = i / 8;
-                    int bitPosition = i % 8;
+                    int byteIndex = (i * 3) / 8;
+                    int bitPosition = (i * 3) % 8;
                     
                     // Pack the red, green, and blue bits into the c byte array
                     c[byteIndex] |= (r << bitPosition);  // Pack red bits
                     c[byteIndex] |= (g << (bitPosition + 1));  // Pack green bits
                     c[byteIndex] |= (b << (bitPosition + 2));  // Pack blue bits
-
+                    
                     // compare to screen buffer
                     //if(!hasChanged && (
                     //    screenBuffer[(2 + y*(150+4))*8 + x*3] != r ||
