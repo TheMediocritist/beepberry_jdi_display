@@ -32,9 +32,10 @@ char commandByte = 0b10000000;
 char clearByte   = 0b00100000;
 char paddingByte = 0b00000000;
 
-char DISP       = 22;
-char SCS        = 8;
-char VCOM       = 23;
+ char DISP       = 22;
+ char SCS        = 8;
+ char VCOM       = 23;
+
 
 int lcdWidth = LCDWIDTH;
 int lcdHeight = 240;
@@ -253,7 +254,7 @@ int fpsThreadFunction(void* v)
 int thread_fn(void* v) 
 {
     //BELOW, 50 becomes 150 becaues we have 3 bits (rgb) per pixel
-    int x, y, i;
+    int x,y, i;
     char r, g, b;
     char p;
     char c[3]; // reduced to 8 x 3 bit pixels as 3 bytes
@@ -307,26 +308,36 @@ int thread_fn(void* v)
                     g = (p & 0b00111000) > 0 ? 1 : 0;  // Bit 3-5 for green
                     b = (p & 0b11000000) > 0 ? 1 : 0;  // Bit 6-7 for blue
 
-                    // Pack the extracted bits into c
+                    // // Pack the extracted bits into c
+                    // c[i % 3] |= (r << (i % 3));  // Pack red bits
+                    // c[i % 3] |= (g << (i % 3 + 1));  // Pack green bits
+                    // c[i % 3] |= (b << (i % 3 + 2));  // Pack blue bits
                     c[i % 3] |= (r << (i/3));  // Pack red bits
                     c[(i*8+1) % 24] |= (g << (i/3 + 1));  // Pack green bits
                     c[(i*8+2) % 24] |= (b << (i/3 + 2));  // Pack blue bits
-                    
-                    //int red_position = i * 3;
-                    //int green_position = i * 3 + 1;
-                    //int blue_position = i * 3 + 2;
-                    
-                    //c[red_position % 24] |= (r << (i / 3));  // Pack red bits
-                    //c[green_position % 24] |= (g << (i / 3 + 1));  // Pack green bits
-                    //c[blue_position % 24] |= (b << (i / 3 + 2));  // Pack blue bits
+
+                    // // Above steps are broken.  Trying again.
+                    // r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
+                    // g = (p & 0b00111000) > 0 ? 2 : 0;  // Bit 3-5 for green
+                    // b = (p & 0b11000000) > 0 ? 4 : 0;  // Bit 6-7 for blue
+
+                    // p = r + g + b;
+                    // // c[i % 3] |= p << ((i % 3) * 3);
+                    // c[(8*i)]
                 }
 
                 // compare to screen buffer
-                if(screenBuffer[2 + x*3 + y*(150+4)] != c[0] ||
-                    screenBuffer[2 + x*3 + 1 + y*(150+4)] != c[1] ||
-                    screenBuffer[2 + x*3 + 2 + y*(150+4)] != c[2])
+                if(!hasChanged && (
+                        screenBuffer[2 + x*3 + y*(150+4)] != c[0] ||
+                        screenBuffer[2 + x*3 + 1 + y*(150+4)] != c[1] ||
+                        screenBuffer[2 + x*3 + 2 + y*(150+4)] != c[2]))
                 {
                     hasChanged = 1;
+                }
+
+                // update screen buffer
+                if (hasChanged)
+                {
                     screenBuffer[2 + x*3 + y*(150+4)] = c[0];
                     screenBuffer[2 + x*3 + 1 + y*(150+4)] = c[1];
                     screenBuffer[2 + x*3 + 2 + y*(150+4)] = c[2];
