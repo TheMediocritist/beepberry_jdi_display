@@ -329,7 +329,6 @@ int thread_fn(void* v)
             //    hasChanged = false;
             }
 
-            }
 
             if (hasChanged)
             {
