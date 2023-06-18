@@ -325,7 +325,7 @@ int thread_fn(void* v)
                     }
                 }
                 if (hasChanged){
-                    memcpy(screenBuffer[2 + x*3 + y*(150+4)], c, 24);
+                    memcpy(&screenBuffer[2 + x*3 + y*(150+4)], c, 24);
                     hasChanged = false;
                 }
 
