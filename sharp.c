@@ -320,6 +320,11 @@ int thread_fn(void* v)
                     g = ((p & 0x38) >> 3) * 36;         // Bit 3-5 for green (0-7 scaled to 0-252)
                     b = ((p & 0xC0) >> 6) * 85;         // Bit 6-7 for blue (0-3 scaled to 0-255)
                     
+                    // convert to 1 bit
+                    r = r >= 128 ? 1 : 0;
+                    g = g >= 128 ? 1 : 0;
+                    b = b >= 128 ? 1 : 0;
+                    
                     // index bytes
                     rByte = (x+3)/8;
                     gByte = (x+3+1)/8;
@@ -331,9 +336,9 @@ int thread_fn(void* v)
                     bBit = (x+3+2) % 8;
                     
                     // Pack the red, green, and blue bits into the c byte array
-                    c[rByte] |= (r << (7 - rBit));  // Pack red bit
-                    c[gByte] |= (g << (7 - gBit));  // Pack green bit
-                    c[bByte] |= (b << (7 - bBit));  // Pack blue bit   
+                    c[rByte] |= (r << (rBit));  // Pack red bit
+                    c[gByte] |= (g << (gBit));  // Pack green bit
+                    c[bByte] |= (b << (bBit));  // Pack blue bit   
                     
                     // Pack the red, green, and blue bits into the c byte array
                     //c[(x+3+0)/8] |= (r << (7 - ((x+3+0)%8)));  // Pack red bits
@@ -352,12 +357,17 @@ int thread_fn(void* v)
                 // update screen buffer
                 //if (hasChanged)
                 //{
+                    // Test: this works (makes entire screen 'white')
+                    //screenBuffer[2 + x * 3 + y*(150+4)] = 255;
+                    //screenBuffer[2 + x * 3 + 1 + y*(150+4)] = 255;
+                    //screenBuffer[2 + x * 3 + 2 + y*(150+4)] = 255;
+                    
+                    // So this must be working:
                     screenBuffer[2 + x * 3 + y*(150+4)] = c[0];
                     screenBuffer[2 + x * 3 + 1 + y*(150+4)] = c[1];
                     screenBuffer[2 + x * 3 + 2 + y*(150+4)] = c[2];
-                    screenBuffer[2 + x * 3 + y*(150+4)] = 255;
-                    screenBuffer[2 + x * 3 + 1 + y*(150+4)] = 255;
-                    screenBuffer[2 + x * 3 + 2 + y*(150+4)] = 255;
+                    
+                    
                 //}
             }
 
