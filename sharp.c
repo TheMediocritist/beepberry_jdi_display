@@ -314,9 +314,9 @@ int thread_fn(void* v)
                     b = ((p & 0b11000000) >> 6) > 0 ? 1 : 0;  // Bit 6-7 for blue
                     
                     // Pack the red, green, and blue bits into the c byte array
-                    c[(x+3+0)/8] |= (r << (7 - ((x+3+0)%3)));  // Pack red bits
-                    c[(x+3+1)/8] |= (g << (7 - ((x+3+1)%3)));  // Pack green bits
-                    c[(x+3+2)/8] |= (b << (7 - ((x+3+2)%3)));  // Pack blue bits
+                    c[(x+3+0)/8] |= (r << (7 - ((x+3+0)%8)));  // Pack red bits
+                    c[(x+3+1)/8] |= (g << (7 - ((x+3+1)%8)));  // Pack green bits
+                    c[(x+3+2)/8] |= (b << (7 - ((x+3+2)%8)));  // Pack blue bits
                 }
 
                 // compare to screen buffer
