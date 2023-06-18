@@ -361,11 +361,15 @@ int thread_fn(void* v)
                     //screenBuffer[2 + x * 3 + y*(150+4)] = 255;
                     //screenBuffer[2 + x * 3 + 1 + y*(150+4)] = 255;
                     //screenBuffer[2 + x * 3 + 2 + y*(150+4)] = 255;
+                    // Test: this works (makes entire screen green)
+                    screenBuffer[2 + x * 3 + y*(150+4)] = 73;
+                    screenBuffer[2 + x * 3 + 1 + y*(150+4)] = 36;
+                    screenBuffer[2 + x * 3 + 2 + y*(150+4)] = 146;
                     
                     // So this must be working:
-                    screenBuffer[2 + x * 3 + y*(150+4)] = c[0];
-                    screenBuffer[2 + x * 3 + 1 + y*(150+4)] = c[1];
-                    screenBuffer[2 + x * 3 + 2 + y*(150+4)] = c[2];
+                    //screenBuffer[2 + x * 3 + y*(150+4)] = c[0];
+                    //screenBuffer[2 + x * 3 + 1 + y*(150+4)] = c[1];
+                    //screenBuffer[2 + x * 3 + 2 + y*(150+4)] = c[2];
                     
                     
                 //}
