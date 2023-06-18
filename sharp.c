@@ -21,6 +21,7 @@
 
 #define LCDWIDTH 400
 #define VIDEOMEMSIZE    (1*1024*1024)   /* 1 MB */
+#define DEBUG_INT(x) printf( #x " at line %d; result: %d\n", __LINE__, x)
 
 /*  Modifying to work with JDI LPM027M128C 8 color display 
     It is pin compatible with the sharp display. 
@@ -79,9 +80,9 @@ static struct fb_var_screeninfo vfb_default = {
     .yres_virtual = 240,
     .bits_per_pixel = 8,
     .grayscale = 0,
-    .red =      { 8, 0, 0 },
-    .green =    { 0, 8, 0 },
-    .blue =     { 0, 0, 8 },
+    .red =      { 1, 0, 0 },
+    .green =    { 0, 1, 0 },
+    .blue =     { 0, 0, 1 },
     .activate = FB_ACTIVATE_NOW,
     .height =   400,
     .width =    240,
@@ -102,7 +103,7 @@ static struct fb_fix_screeninfo vfb_fix = {
     .xpanstep = 0,
     .ypanstep = 0,
     .ywrapstep =    0,
-    .visual =	FB_VISUAL_TRUECOLOR,
+    .visual =	FB_VISUAL_PSEUDOCOLOR,
     // TODO: see if we can use hw acceleration at all for pi zero.
     .accel =    FB_ACCEL_NONE,
 };
@@ -293,10 +294,12 @@ int thread_fn(void* v)
 
         for(y=0 ; y < 240 ; y++)
         {
+            DEBUG_INT(y);
             hasChanged = 0;
 
             for(x=0 ; x<50 ; x++)
             {
+                DEUBUG_INT(x);
                 // We work on 8 pixels at a time... 50 * 8 => 400 pixels
 
                 // Each 8 pixels compress indo 3 byte c[] and are copied to the screenBuffer.
@@ -306,6 +309,7 @@ int thread_fn(void* v)
                 // Iterate over 8 pixels
                 for (i = 0; i < 8; i++) {
                     p = ioread8((void*)((uintptr_t)info->fix.smem_start + ((x+ 1)*8 + i + y*400)));
+                    DEBUG_INT(p);
 
                     // Extract the red, green, and blue values for the current pixel
                     //r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
@@ -320,20 +324,33 @@ int thread_fn(void* v)
                     g = ((p & 0x38) >> 3) * 36;         // Bit 3-5 for green (0-7 scaled to 0-252)
                     b = ((p & 0xC0) >> 6) * 85;         // Bit 6-7 for blue (0-3 scaled to 0-255)
                     
+                    DEBUG_INT(r);
+                    DEBUG_INT(g);
+                    DEBUG_INT(b);
+                    
                     // convert to 1 bit
                     r = r >= 128 ? 1 : 0;
                     g = g >= 128 ? 1 : 0;
                     b = b >= 128 ? 1 : 0;
+                    DEBUG_INT(r);
+                    DEBUG_INT(g);
+                    DEBUG_INT(b);
                     
                     // index bytes
                     rByte = (x+3)/8;
                     gByte = (x+3+1)/8;
                     bByte = (x+3+2)/8;
+                    DEBUG_INT(rByte);
+                    DEBUG_INT(gByte);
+                    DEBUG_INT(bByte);
                     
                     //index bits
                     rBit = (x+3) % 8;
                     gBit = (x+3+1) % 8;
                     bBit = (x+3+2) % 8;
+                    DEBUG_INT(rBit);
+                    DEBUG_INT(gBit);
+                    DEBUG_INT(bBit);
                     
                     // Pack the red, green, and blue bits into the c byte array
                     c[rByte] |= (r << (rBit));  // Pack red bit
