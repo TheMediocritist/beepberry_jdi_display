@@ -309,12 +309,19 @@ int thread_fn(void* v)
                     b = (p & 0b11000000) > 0 ? 1 : 0;  // Bit 6-7 for blue
 
                     // // Pack the extracted bits into c
+                    int red_position = i % 3;
+                    int green_position = (i * 8 + 1) % 24;
+                    int blue_position = (i * 8 + 2) % 24;
+                    
+                    c[red_position] |= (r << (i / 3))  // Pack red bits
+                    c[green_position] |= (g << (i / 3 + 1))  // Pack green bits
+                    c[blue_position] |= (b << (i / 3 + 2)) // Pack blue bits
                     // c[i % 3] |= (r << (i % 3));  // Pack red bits
                     // c[i % 3] |= (g << (i % 3 + 1));  // Pack green bits
                     // c[i % 3] |= (b << (i % 3 + 2));  // Pack blue bits
-                    c[i % 3] |= (r << (i/3));  // Pack red bits
-                    c[(i*8+1) % 24] |= (g << (i/3 + 1));  // Pack green bits
-                    c[(i*8+2) % 24] |= (b << (i/3 + 2));  // Pack blue bits
+                    //c[i % 3] |= (r << (i/3));  // Pack red bits
+                    //c[(i*8+1) % 24] |= (g << (i/3 + 1));  // Pack green bits
+                    //c[(i*8+2) % 24] |= (b << (i/3 + 2));  // Pack blue bits
 
                     // // Above steps are broken.  Trying again.
                     // r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
