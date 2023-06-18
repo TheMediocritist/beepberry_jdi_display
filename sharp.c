@@ -32,12 +32,9 @@ char commandByte = 0b10000000;
 char clearByte   = 0b00100000;
 char paddingByte = 0b00000000;
 
-// char DISP       = 22;
-// char SCS        = 8;
-// char VCOM       = 23;
-char DISP       = 24;
-char SCS        = 23;
-char VCOM       = 25;
+char DISP       = 22;
+char SCS        = 8;
+char VCOM       = 23;
 
 int lcdWidth = LCDWIDTH;
 int lcdHeight = 240;
@@ -256,13 +253,13 @@ int fpsThreadFunction(void* v)
 int thread_fn(void* v) 
 {
     //BELOW, 50 becomes 150 becaues we have 3 bits (rgb) per pixel
-    int x, y, i;
+    int x,y;
     char r, g, b;
     char p;
     char c[3]; // reduced to 8 x 3 bit pixels as 3 bytes
     // int shift;
     // uint24_t c;
-    bool hasChanged = false;
+    char hasChanged = 0;
 
     unsigned char *screenBuffer;
 
@@ -291,40 +288,67 @@ int thread_fn(void* v)
 
         for(y=0 ; y < 240 ; y++)
         {
+            hasChanged = 0;
+
             for(x=0 ; x<50 ; x++)
             {
                 // We work on 8 pixels at a time... 50 * 8 => 400 pixels
+
                 // Each 8 pixels compress indo 3 byte c[] and are copied to the screenBuffer.
 
                 memset(c, 0, sizeof(c));
 
                 // Iterate over 8 pixels
-                for (i = 0; i < 8; i++) {
+                for (int i = 0; i < 8; i++) {
                     p = ioread8((void*)((uintptr_t)info->fix.smem_start + (x*8 + i + y*400)));
 
                     // Extract the red, green, and blue values for the current pixel
                     r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
-                    g = ((p & 0b00111000) >> 3) > 0 ? 1 : 0;  // Bit 3-5 for green
-                    b = ((p & 0b11000000) >> 6) > 0 ? 1 : 0;  // Bit 6-7 for blue
-                    
-                    c[i % 3] |= (r << (i/3));  // Pack red bits
-                    c[(i*8+1) % 24] |= (g << (i/3 + 1));  // Pack green bits
-                    c[(i*8+2) % 24] |= (b << (i/3 + 2));  // Pack blue bits
-                    
-                    // compare to screen buffer
-                    //if(!hasChanged && (
-                    //    screenBuffer[(2 + y*(150+4))*8 + x*3] != r ||
-                    //    screenBuffer[(2 + y*(150+4))*8 + x*3 + 1] != g ||
-                    //    screenBuffer[(2 + y*(150+4))*8 + x*3 + 2] != b))
-                    //{
-                    //    hasChanged = 1;
-                    //}
-                }
-            //if (hasChanged){
-                memcpy(&screenBuffer[(2 + y*(150+4)) + x*3], c, 3);
-            //    hasChanged = false;
-            }
+                    g = (p & 0b00111000) > 0 ? 1 : 0;  // Bit 3-5 for green
+                    b = (p & 0b11000000) > 0 ? 1 : 0;  // Bit 6-7 for blue
 
+                    // // Pack the extracted bits into c
+                    // c[i % 3] |= (r << (i % 3));  // Pack red bits
+                    // c[i % 3] |= (g << (i % 3 + 1));  // Pack green bits
+                    // c[i % 3] |= (b << (i % 3 + 2));  // Pack blue bits
+                    //c[i % 3] |= (r << (i/3));  // Pack red bits
+                    //c[(i*8+1) % 24] |= (g << (i/3 + 1));  // Pack green bits
+                    //c[(i*8+2) % 24] |= (b << (i/3 + 2));  // Pack blue bits
+                    
+                    int red_position = i * 3;
+                    int green_position = i * 3 + 1;
+                    int blue_position = i * 3 + 2;
+                    
+                    c[red_position % 24] |= (r << (i / 3));  // Pack red bits
+                    c[green_position % 24] |= (g << (i / 3 + 1));  // Pack green bits
+                    c[blue_position % 24] |= (b << (i / 3 + 2));  // Pack blue bits
+                    // // Above steps are broken.  Trying again.
+                    // r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
+                    // g = (p & 0b00111000) > 0 ? 2 : 0;  // Bit 3-5 for green
+                    // b = (p & 0b11000000) > 0 ? 4 : 0;  // Bit 6-7 for blue
+
+                    // p = r + g + b;
+                    // // c[i % 3] |= p << ((i % 3) * 3);
+                    // c[(8*i)]
+                }
+
+                // compare to screen buffer
+                if(!hasChanged && (
+                        screenBuffer[2 + x*3 + y*(150+4)] != c[0] ||
+                        screenBuffer[2 + x*3 + 1 + y*(150+4)] != c[1] ||
+                        screenBuffer[2 + x*3 + 2 + y*(150+4)] != c[2]))
+                {
+                    hasChanged = 1;
+                }
+
+                // update screen buffer
+                if (hasChanged)
+                {
+                    screenBuffer[2 + x*3 + y*(150+4)] = c[0];
+                    screenBuffer[2 + x*3 + 1 + y*(150+4)] = c[1];
+                    screenBuffer[2 + x*3 + 2 + y*(150+4)] = c[2];
+                }
+            }
 
             if (hasChanged)
             {
@@ -426,7 +450,7 @@ err:
     return 0;
 }
 
-static int sharp_remove(struct spi_device *spi)
+static void sharp_remove(struct spi_device *spi)
 {
         if (info) {
                 unregister_framebuffer(info);
@@ -437,7 +461,7 @@ static int sharp_remove(struct spi_device *spi)
     kthread_stop(fpsThread);
     kthread_stop(vcomToggleThread);
     printk(KERN_CRIT "out of screen module");
-    return 0;
+    //return 0;
 }
 
 static struct spi_driver sharp_driver = {
