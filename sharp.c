@@ -259,10 +259,10 @@ int thread_fn(void* v)
     int x, y, i;
     char r, g, b;
     char p;
-    char c[3]; // reduced to 8 x 3 bit pixels as 3 bytes
+    char c[24]; // reduced to 8 x 3 bit pixels as 3 bytes
     // int shift;
     // uint24_t c;
-    char hasChanged = 0;
+    bool hasChanged = false;
 
     unsigned char *screenBuffer;
 
@@ -291,12 +291,9 @@ int thread_fn(void* v)
 
         for(y=0 ; y < 240 ; y++)
         {
-            hasChanged = 0;
-
             for(x=0 ; x<50 ; x++)
             {
                 // We work on 8 pixels at a time... 50 * 8 => 400 pixels
-
                 // Each 8 pixels compress indo 3 byte c[] and are copied to the screenBuffer.
 
                 memset(c, 0, sizeof(c));
@@ -325,11 +322,13 @@ int thread_fn(void* v)
                         screenBuffer[2 + x*3 + 2 + y*(150+4)] != c[2]))
                     {
                         hasChanged = 1;
-                        screenBuffer[2 + x*3 + y*(150+4)] = c[0];
-                        screenBuffer[2 + x*3 + 1 + y*(150+4)] = c[1];
-                        screenBuffer[2 + x*3 + 2 + y*(150+4)] = c[2];
                     }
                 }
+                if (hasChanged){
+                    memcpy(screenBuffer[2 + x*3 + y*(150+4)], c, 24);
+                    hasChanged = false;
+                }
+
             }
 
             if (hasChanged)
