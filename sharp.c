@@ -309,9 +309,9 @@ int thread_fn(void* v)
                     //b = (p & 0b11000000) > 0 ? 1 : 0;  // Bit 6-7 for blue
 
                     // // Pack the extracted bits into c
-                    r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
-                    g = ((p & 0b00111000) >> 3) > 0 ? 1 : 0;  // Bit 3-5 for green
-                    b = ((p & 0b11000000) >> 6) > 0 ? 1 : 0;  // Bit 6-7 for blue
+                    r = (p & 0b00000111) > 3 ? 1 : 0;  // Bit 0-2 for red
+                    g = ((p & 0b00111000) >> 3) > 3 ? 1 : 0;  // Bit 3-5 for green
+                    b = ((p & 0b11000000) >> 6) > 3 ? 1 : 0;  // Bit 6-7 for blue
                     
                     // Calculate the index of the byte and the bit position within the byte
                     int byteIndex = (i * 3) / 8;
