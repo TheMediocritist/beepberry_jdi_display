@@ -256,10 +256,10 @@ int fpsThreadFunction(void* v)
 int thread_fn(void* v) 
 {
     //BELOW, 50 becomes 150 becaues we have 3 bits (rgb) per pixel
-    uint_8 x, y, i;
+    uint8_t x, y, i;
     char r, g, b;
-    uint_8 rByte, gByte, bByte;
-    uint_8 rBit, gBit, bBit;
+    uint8_t rByte, gByte, bByte;
+    uint8_t rBit, gBit, bBit;
     char p;
     char c[3]; // reduced to 8 x 3 bit pixels as 3 bytes
     // int shift;
