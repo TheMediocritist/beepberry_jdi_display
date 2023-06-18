@@ -327,10 +327,9 @@ int thread_fn(void* v)
                 }
 
                 // compare to screen buffer
-                if(!hasChanged && (
-                        screenBuffer[2 + x*3 + y*(150+4)] != c[0] ||
-                        screenBuffer[2 + x*3 + 1 + y*(150+4)] != c[1] ||
-                        screenBuffer[2 + x*3 + 2 + y*(150+4)] != c[2]))
+                if( screenBuffer[2 + x*3 + y*(150+4)] != c[0] ||
+                    screenBuffer[2 + x*3 + 1 + y*(150+4)] != c[1] ||
+                    screenBuffer[2 + x*3 + 2 + y*(150+4)] != c[2])
                 {
                     hasChanged = 1;
                 }
