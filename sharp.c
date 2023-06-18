@@ -259,7 +259,7 @@ int thread_fn(void* v)
     int x, y, i;
     char r, g, b;
     char p;
-    char c[24]; // reduced to 8 x 3 bit pixels as 3 bytes
+    char c[3]; // reduced to 8 x 3 bit pixels as 3 bytes
     // int shift;
     // uint24_t c;
     bool hasChanged = false;
@@ -304,28 +304,24 @@ int thread_fn(void* v)
 
                     // Extract the red, green, and blue values for the current pixel
                     r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
-                    g = (p & 0b00111000) > 0 ? 1 : 0;  // Bit 3-5 for green
-                    b = (p & 0b11000000) > 0 ? 1 : 0;  // Bit 6-7 for blue
+                    g = ((p & 0b00111000) >> 3) > 0 ? 1 : 0;  // Bit 3-5 for green
+                    b = ((p & 0b11000000) >> 6) > 0 ? 1 : 0;  // Bit 6-7 for blue
 
-                    c[i*3] |= (r << (i/3));  // Pack red bits
-                    c[(i*3+1)] |= (g << (i/3 + 1));  // Pack green bits
-                    c[(i*3+2)] |= (b << (i/3 + 2));  // Pack blue bits
-
-                    c[i*3] = 1;
-                    c[i*3+1] = 1;
-                    c[i*3+2] = 1;
+                    c[i*3] |= (r << (i % 3));  // Pack red bits
+                    c[i*3 + 1] |= (g << (i % 3));  // Pack green bits
+                    c[i*3 + 2] |= (b << (i % 3));  // Pack blue bits
 
                     // compare to screen buffer
                     //if(!hasChanged && (
-                    //    screenBuffer[(2 + y*(150+4))*8 + x*3] != c[0] ||
-                    //    screenBuffer[(2 + y*(150+4))*8 + x*3 + 1] != c[1] ||
-                    //    screenBuffer[(2 + y*(150+4))*8 + x*3 + 2] != c[2]))
+                    //    screenBuffer[(2 + y*(150+4))*8 + x*3] != r ||
+                    //    screenBuffer[(2 + y*(150+4))*8 + x*3 + 1] != g ||
+                    //    screenBuffer[(2 + y*(150+4))*8 + x*3 + 2] != b))
                     //{
                     //    hasChanged = 1;
                     //}
                 }
             //if (hasChanged){
-                memcpy(&screenBuffer[(2 + y*(150+4))*8 + x*3], c, 24);
+                memcpy(&screenBuffer[(2 + y*(150+4)) + x*3], c, 3);
             //    hasChanged = false;
             }
 
