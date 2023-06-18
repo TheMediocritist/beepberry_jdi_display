@@ -298,7 +298,7 @@ int thread_fn(void* v)
                 memset(c, 0, sizeof(c));
                 
                 // get current pseudocolor (8 bit) pixel
-                p = ioread8((void*)((uintptr_t)info->fix.smem_start + (x * 8 + y * 400)));
+                p = ioread8((void*)((uintptr_t)info->fix.smem_start + (x + y * 400)));
                 
                 // Extract the red, green, and blue values for the current pixel
                 r = (p & 0x07) >= threshold ? 1 : 0;  // Bits 0-2 for red
@@ -314,9 +314,9 @@ int thread_fn(void* v)
                     hasChanged = true;
                     
                     // Write r, g, b sub-pixels to the screenbuffer
-                    screenBuffer[(2 + x + y * 150 + 4) * 8] = r;
-                    screenBuffer[(2 + x + y * 150 + 4) * 8 + 1] = g;
-                    screenBuffer[(2 + x + y * 150 + 4) * 8 + 2] = b;
+                    screenBuffer[(2 + y * 150 + 4) * 8 + (x * 3)] = r;
+                    screenBuffer[(2 + y * 150 + 4) * 8 + (x * 3) + 1] = g;
+                    screenBuffer[(2 + y * 150 + 4) * 8 + (x * 3) + 2] = b;
                 //}
             }
   
