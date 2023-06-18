@@ -305,7 +305,7 @@ int thread_fn(void* v)
 
                 // Iterate over 8 pixels
                 for (i = 0; i < 8; i++) {
-                    p = ioread8((void*)((uintptr_t)info->fix.smem_start + (x*8 + i + y*400)));
+                    p = ioread8((void*)((uintptr_t)info->fix.smem_start + ((x+ 1)*8 + i + y*400)));
 
                     // Extract the red, green, and blue values for the current pixel
                     //r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
