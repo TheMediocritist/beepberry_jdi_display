@@ -288,7 +288,7 @@ int thread_fn(void* v)
 
     while (!kthread_should_stop()) 
     {
-        msleep(50);
+        msleep(10);
 
         for(y=0 ; y < 240 ; y++)
         {
@@ -298,7 +298,7 @@ int thread_fn(void* v)
                 memset(c, 0, sizeof(c));
                 
                 // get current pseudocolor (8 bit) pixel
-                p = ioread8((void*)((uintptr_t)info->fix.smem_start + (x + y * 400)));
+                p = ioread8((void*)((uintptr_t)info->fix.smem_start + (x * 8 + y * 400)));
                 
                 // Extract the red, green, and blue values for the current pixel
                 r = (p & 0x07) >= threshold ? 1 : 0;  // Bits 0-2 for red
