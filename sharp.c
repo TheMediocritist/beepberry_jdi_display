@@ -314,9 +314,9 @@ int thread_fn(void* v)
                     c[(i*3+1)] |= (g << (i/3 + 1));  // Pack green bits
                     c[(i*3+2)] |= (b << (i/3 + 2));  // Pack blue bits
 
-                    c[i*3] = r;
-                    c[i*3+1] = g;
-                    b[i*3+2] = b;
+                    c[i*3] = 1;
+                    c[i*3+1] = 1;
+                    b[i*3+2] = 1;
                 }
 
                 // compare to screen buffer
