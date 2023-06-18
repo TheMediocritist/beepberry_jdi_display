@@ -277,7 +277,7 @@ int thread_fn(void* v)
     {
     gpio_set_value(SCS, 1);
     screenBuffer[y*(150+4)] = commandByte;
-    screenBuffer[y*(150+4) + 1] = reverseByte(y+1); //sharp display lines are indexed from 1
+    screenBuffer[y*(150+4) + 1] = y; //reverseByte(y+1); //sharp display lines are indexed from 1
     screenBuffer[y*(150+4) + 152] = paddingByte;
     screenBuffer[y*(150+4) + 153] = paddingByte;
 
@@ -352,9 +352,9 @@ int thread_fn(void* v)
                 // update screen buffer
                 //if (hasChanged)
                 //{
-                    screenBuffer[2 + x*3 + y*(150+4)] = c[0];
-                    screenBuffer[2 + x*3 + 1 + y*(150+4)] = c[1];
-                    screenBuffer[2 + x*3 + 2 + y*(150+4)] = c[2];
+                    screenBuffer[2 + x + y*(150+4)] = c[0];
+                    screenBuffer[2 + x + 1 + y*(150+4)] = c[1];
+                    screenBuffer[2 + x + 2 + y*(150+4)] = c[2];
                 //}
             }
 
