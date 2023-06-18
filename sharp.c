@@ -317,13 +317,18 @@ int thread_fn(void* v)
                     c[i*3] = 1;
                     c[i*3+1] = 1;
                     c[i*3+2] = 1;
-                }
 
-                // compare to screen buffer
-                if(!hasChanged && (screenBuffer[2 + x*3 + y*(150+4)] != c))
-                {
-                    hasChanged = 1;
-                    screenBuffer[2 + x*3 + y*(150+4)] = c;
+                    // compare to screen buffer
+                    if(!hasChanged && (
+                        screenBuffer[2 + x*3 + y*(150+4)] != c[0] ||
+                        screenBuffer[2 + x*3 + 1 + y*(150+4)] != c[1] ||
+                        screenBuffer[2 + x*3 + 2 + y*(150+4)] != c[2]))
+                    {
+                        hasChanged = 1;
+                        screenBuffer[2 + x*3 + y*(150+4)] = c[0];
+                        screenBuffer[2 + x*3 + 1 + y*(150+4)] = c[1];
+                        screenBuffer[2 + x*3 + 2 + y*(150+4)] = c[2];
+                    }
                 }
             }
 
