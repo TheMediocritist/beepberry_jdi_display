@@ -317,15 +317,15 @@ int thread_fn(void* v)
 
                     // compare to screen buffer
                     if(!hasChanged && (
-                        screenBuffer[2 + x*3 + y*(150+4)] != c[0] ||
-                        screenBuffer[2 + x*3 + 1 + y*(150+4)] != c[1] ||
-                        screenBuffer[2 + x*3 + 2 + y*(150+4)] != c[2]))
+                        screenBuffer[(2 + y*(150+4))*8 + x*3] != c[0] ||
+                        screenBuffer[(2 + y*(150+4))*8 + x*3 + 1] != c[1] ||
+                        screenBuffer[(2 + y*(150+4))*8 + x*3 + 2] != c[2]))
                     {
                         hasChanged = 1;
                     }
                 }
                 if (hasChanged){
-                    memcpy(&screenBuffer[2 + x*3 + y*(150+4)], c, 24);
+                    memcpy(&screenBuffer[(2 + y*(150+4))*8 + x*3], c, 24);
                     hasChanged = false;
                 }
 
