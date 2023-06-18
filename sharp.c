@@ -102,7 +102,7 @@ static struct fb_fix_screeninfo vfb_fix = {
     .xpanstep = 0,
     .ypanstep = 0,
     .ywrapstep =    0,
-    .visual =	FB_VISUAL_PSEUDOCOLOR,
+    .visual =	FB_VISUAL_TRUECOLOR,
     // TODO: see if we can use hw acceleration at all for pi zero.
     .accel =    FB_ACCEL_NONE,
 };
@@ -362,14 +362,14 @@ int thread_fn(void* v)
                     //screenBuffer[2 + x * 3 + 1 + y*(150+4)] = 255;
                     //screenBuffer[2 + x * 3 + 2 + y*(150+4)] = 255;
                     // Test: this works (makes entire screen green)
-                    screenBuffer[2 + x * 3 + y*(150+4)] = 73;
-                    screenBuffer[2 + x * 3 + 1 + y*(150+4)] = 36;
-                    screenBuffer[2 + x * 3 + 2 + y*(150+4)] = 146;
+                    //screenBuffer[2 + x * 3 + y*(150+4)] = 73;         0b01001001
+                    //screenBuffer[2 + x * 3 + 1 + y*(150+4)] = 36;     0b00100100
+                    //screenBuffer[2 + x * 3 + 2 + y*(150+4)] = 146;    0b10010010
                     
                     // So this must be working:
-                    //screenBuffer[2 + x * 3 + y*(150+4)] = c[0];
-                    //screenBuffer[2 + x * 3 + 1 + y*(150+4)] = c[1];
-                    //screenBuffer[2 + x * 3 + 2 + y*(150+4)] = c[2];
+                    screenBuffer[2 + x * 3 + y*(150+4)] = c[0];
+                    screenBuffer[2 + x * 3 + 1 + y*(150+4)] = c[1];
+                    screenBuffer[2 + x * 3 + 2 + y*(150+4)] = c[2];
                     
                     
                 //}
