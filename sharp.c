@@ -327,28 +327,28 @@ int thread_fn(void* v)
                 }
 
                 // compare to screen buffer
-                if( screenBuffer[2 + x*3 + y*(150+4)] != c[0] ||
-                    screenBuffer[2 + x*3 + 1 + y*(150+4)] != c[1] ||
-                    screenBuffer[2 + x*3 + 2 + y*(150+4)] != c[2])
-                {
-                    hasChanged = 1;
-                }
+                //if( screenBuffer[2 + x*3 + y*(150+4)] != c[0] ||
+                //    screenBuffer[2 + x*3 + 1 + y*(150+4)] != c[1] ||
+                //    screenBuffer[2 + x*3 + 2 + y*(150+4)] != c[2])
+                //{
+                //    hasChanged = 1;
+                //}
 
                 // update screen buffer
-                if (hasChanged)
-                {
+                //if (hasChanged)
+                //{
                     screenBuffer[2 + x*3 + y*(150+4)] = c[0];
                     screenBuffer[2 + x*3 + 1 + y*(150+4)] = c[1];
                     screenBuffer[2 + x*3 + 2 + y*(150+4)] = c[2];
-                }
+                //}
             }
 
-            if (hasChanged)
-            {
+            //if (hasChanged)
+            //{
                 gpio_set_value(SCS, 1);
                 spi_write(screen->spi, (const u8 *)(screenBuffer+(y*(150+4))), 154);
                 gpio_set_value(SCS, 0);
-            }
+            //}
         }
     }
 
