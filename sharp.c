@@ -315,8 +315,8 @@ int thread_fn(void* v)
                     // c[i % 3] |= (g << (i % 3 + 1));  // Pack green bits
                     // c[i % 3] |= (b << (i % 3 + 2));  // Pack blue bits
                     c[i*3] |= (r << (i/3));  // Pack red bits
-                    c[(i*3+1) |= (g << (i/3 + 1));  // Pack green bits
-                    c[(i*3+2) |= (b << (i/3 + 2));  // Pack blue bits
+                    c[(i*3+1)] |= (g << (i/3 + 1));  // Pack green bits
+                    c[(i*3+2)] |= (b << (i/3 + 2));  // Pack blue bits
 
                     // // Above steps are broken.  Trying again.
                     // r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
