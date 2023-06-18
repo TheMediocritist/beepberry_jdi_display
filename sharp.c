@@ -316,7 +316,7 @@ int thread_fn(void* v)
 
                     c[i*3] = 1;
                     c[i*3+1] = 1;
-                    b[i*3+2] = 1;
+                    c[i*3+2] = 1;
                 }
 
                 // compare to screen buffer
