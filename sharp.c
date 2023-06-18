@@ -31,8 +31,8 @@ char commandByte    = 0b10000000;
 // char vcomByte    = 0b01000000;
 char clearByte      = 0b00100000;
 char paddingByte    = 0b00000000;
-char 4bitWriteLine  = 0b10010000;
-char 3bitWriteLine  = 0b10000000;
+char fourBitWriteByte  = 0b10010000;
+char threeBitWriteByte  = 0b10000000;
 
  char DISP       = 22;
  char SCS        = 8;
