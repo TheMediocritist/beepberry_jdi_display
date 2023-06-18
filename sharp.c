@@ -313,9 +313,9 @@ int thread_fn(void* v)
                     int green_position = (i * 8 + 1) % 24;
                     int blue_position = (i * 8 + 2) % 24;
                     
-                    c[red_position] |= (r << (i / 3))  // Pack red bits
-                    c[green_position] |= (g << (i / 3 + 1))  // Pack green bits
-                    c[blue_position] |= (b << (i / 3 + 2)) // Pack blue bits
+                    c[red_position] |= (r << (i / 3));  // Pack red bits
+                    c[green_position] |= (g << (i / 3 + 1));  // Pack green bits
+                    c[blue_position] |= (b << (i / 3 + 2)); // Pack blue bits
                     // c[i % 3] |= (r << (i % 3));  // Pack red bits
                     // c[i % 3] |= (g << (i % 3 + 1));  // Pack green bits
                     // c[i % 3] |= (b << (i % 3 + 2));  // Pack blue bits
