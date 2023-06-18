@@ -306,10 +306,10 @@ int thread_fn(void* v)
                 b = ((p & 0xC0) >> 6) >= threshold ? 1 : 0;  // Bits 6-7 for blue (shifted 6 positions to the right)
                 
                 // Compare pixel p to buffer 
-                if (r != screenBuffer[(2 + x + y * 150 + 4) * 8] || 
-                    g != screenBuffer[(2 + x + y * 150 + 4) * 8 + 1] ||
-                    b != screenBuffer[(2 + x + y * 150 + 4) * 8 + 2])
-                {
+                //if (r != screenBuffer[(2 + x + y * 150 + 4) * 8] || 
+                //    g != screenBuffer[(2 + x + y * 150 + 4) * 8 + 1] ||
+                //    b != screenBuffer[(2 + x + y * 150 + 4) * 8 + 2])
+                //{
                     // flag that line needs to be redrawn to screen
                     hasChanged = true;
                     
@@ -317,7 +317,7 @@ int thread_fn(void* v)
                     screenBuffer[(2 + x + y * 150 + 4) * 8] = r;
                     screenBuffer[(2 + x + y * 150 + 4) * 8 + 1] = g;
                     screenBuffer[(2 + x + y * 150 + 4) * 8 + 2] = b;
-                }
+                //}
             }
   
             if (hasChanged)
