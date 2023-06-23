@@ -294,14 +294,11 @@ int thread_fn(void* v)
 
         for(y=0 ; y < 240 ; y++)
         {
-            DEBUG_INT(y);
             hasChanged = 0;
 
             for(x=0 ; x<50 ; x++)
             {
-                DEUBUG_INT(x);
                 // We work on 8 pixels at a time... 50 * 8 => 400 pixels
-
                 // Each 8 pixels compress indo 3 byte c[] and are copied to the screenBuffer.
 
                 memset(c, 0, sizeof(c));
@@ -309,58 +306,31 @@ int thread_fn(void* v)
                 // Iterate over 8 pixels
                 for (i = 0; i < 8; i++) {
                     p = ioread8((void*)((uintptr_t)info->fix.smem_start + ((x+ 1)*8 + i + y*400)));
-                    DEBUG_INT(p);
 
                     // Extract the red, green, and blue values for the current pixel
-                    //r = (p & 0b00000111) > 0 ? 1 : 0;  // Bit 0-2 for red
-                    //g = (p & 0b00111000) > 0 ? 1 : 0;  // Bit 3-5 for green
-                    //b = (p & 0b11000000) > 0 ? 1 : 0;  // Bit 6-7 for blue
-
-                    // Extract the red, green, and blue values for the current pixel
-                    //r = (p & 0b00000111) * 36;          // Bit 0-2 for red (0-7 scaled to 0-252)
-                    //g = ((p & 0b00111000) >> 3) * 36;   // Bit 3-5 for green (0-7 scaled to 0-252)
-                    //b = ((p & 0b11000000) >> 6) * 85;   // Bit 6-7 for blue (0-3 scaled to 0-255)
                     r = (p & 0x07) * 36;                // Bit 0-2 for red (0-7 scaled to 0-252)
                     g = ((p & 0x38) >> 3) * 36;         // Bit 3-5 for green (0-7 scaled to 0-252)
                     b = ((p & 0xC0) >> 6) * 85;         // Bit 6-7 for blue (0-3 scaled to 0-255)
                     
-                    DEBUG_INT(r);
-                    DEBUG_INT(g);
-                    DEBUG_INT(b);
-                    
                     // convert to 1 bit
-                    r = r >= 128 ? 1 : 0;
-                    g = g >= 128 ? 1 : 0;
+                    r = r >= 126 ? 1 : 0;
+                    g = g >= 126 ? 1 : 0;
                     b = b >= 128 ? 1 : 0;
-                    DEBUG_INT(r);
-                    DEBUG_INT(g);
-                    DEBUG_INT(b);
                     
                     // index bytes
                     rByte = (x*3)/8;
                     gByte = (x*3+1)/8;
                     bByte = (x*3+2)/8;
-                    DEBUG_INT(rByte);
-                    DEBUG_INT(gByte);
-                    DEBUG_INT(bByte);
                     
                     //index bits
                     rBit = (x*3) % 8;
                     gBit = (x*3+1) % 8;
                     bBit = (x*3+2) % 8;
-                    DEBUG_INT(rBit);
-                    DEBUG_INT(gBit);
-                    DEBUG_INT(bBit);
                     
                     // Pack the red, green, and blue bits into the c byte array
                     c[rByte] |= (r << (rBit));  // Pack red bit
                     c[gByte] |= (g << (gBit));  // Pack green bit
                     c[bByte] |= (b << (bBit));  // Pack blue bit   
-                    
-                    // Pack the red, green, and blue bits into the c byte array
-                    //c[(x+3+0)/8] |= (r << (7 - ((x+3+0)%8)));  // Pack red bits
-                    //c[(x+3+1)/8] |= (g << (7 - ((x+3+1)%8)));  // Pack green bits
-                    //c[(x+3+2)/8] |= (b << (7 - ((x+3+2)%8)));  // Pack blue bits
                 }
 
                 // compare to screen buffer
