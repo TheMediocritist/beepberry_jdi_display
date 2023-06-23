@@ -265,7 +265,7 @@ int thread_fn(void* v)
     char c[3]; // reduced to 8 x 3 bit pixels as 3 bytes
     // int shift;
     // uint24_t c;
-    char hasChanged = 0;
+    char byteHasChanged, lineHasChanged = 0;
 
     unsigned char *screenBuffer;
 
@@ -294,7 +294,7 @@ int thread_fn(void* v)
 
         for(y=0 ; y < 240 ; y++)
         {
-            hasChanged = 0;
+            lineHasChanged = 0;
 
             for(x=0 ; x<50 ; x++)
             {
@@ -302,6 +302,7 @@ int thread_fn(void* v)
                 // Each 8 pixels compress indo 3 byte c[] and are copied to the screenBuffer.
 
                 memset(c, 0, sizeof(c));
+                byteHasChanged = 0
 
                 // Iterate over 8 pixels
                 for (i = 0; i < 8; i++) {
@@ -338,11 +339,12 @@ int thread_fn(void* v)
                 //    screenBuffer[2 + x*3 + 1 + y*(150+4)] != c[1] ||
                 //    screenBuffer[2 + x*3 + 2 + y*(150+4)] != c[2])
                 //{
-                //    hasChanged = 1;
+                //    lineHasChanged = 1;
+                //    byteHasChanged = 1;
                 //}
 
                 // update screen buffer
-                //if (hasChanged)
+                //if (byteHasChanged)
                 //{
                     // Test: this works (makes entire screen 'white')
                     //screenBuffer[2 + x * 3 + y*(150+4)] = 255;
@@ -362,7 +364,7 @@ int thread_fn(void* v)
                 //}
             }
 
-            //if (hasChanged)
+            //if (lineHasChanged)
             //{
                 gpio_set_value(SCS, 1);
                 spi_write(screen->spi, (const u8 *)(screenBuffer+(y*(150+4))), 154);
