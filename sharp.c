@@ -337,17 +337,17 @@ int thread_fn(void* v)
                     DEBUG_INT(b);
                     
                     // index bytes
-                    rByte = (x+3)/8;
-                    gByte = (x+3+1)/8;
-                    bByte = (x+3+2)/8;
+                    rByte = (x*3)/8;
+                    gByte = (x*3+1)/8;
+                    bByte = (x*3+2)/8;
                     DEBUG_INT(rByte);
                     DEBUG_INT(gByte);
                     DEBUG_INT(bByte);
                     
                     //index bits
-                    rBit = (x+3) % 8;
-                    gBit = (x+3+1) % 8;
-                    bBit = (x+3+2) % 8;
+                    rBit = (x*3) % 8;
+                    gBit = (x*3+1) % 8;
+                    bBit = (x*3+2) % 8;
                     DEBUG_INT(rBit);
                     DEBUG_INT(gBit);
                     DEBUG_INT(bBit);
