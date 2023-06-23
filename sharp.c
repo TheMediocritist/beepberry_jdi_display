@@ -257,7 +257,7 @@ int fpsThreadFunction(void* v)
 int thread_fn(void* v) 
 {
     //BELOW, 50 becomes 150 becaues we have 3 bits (rgb) per pixel
-    uint8_t x, y, i;
+    uint8_t x, y, i, byte_position;
     char r, g, b;
     uint8_t rByte, gByte, bByte;
     uint8_t rBit, gBit, bBit;
@@ -302,7 +302,8 @@ int thread_fn(void* v)
                 // Each 8 pixels compress indo 3 byte c[] and are copied to the screenBuffer.
 
                 memset(c, 0, sizeof(c));
-                byteHasChanged = 0
+                byteHasChanged = 0;
+                byte_position = 2 + x*3 + y*(150+4);
 
                 // Iterate over 8 pixels
                 for (i = 0; i < 8; i++) {
@@ -335,12 +336,12 @@ int thread_fn(void* v)
                 }
 
                 // compare to screen buffer
-                //if( screenBuffer[2 + x*3 + y*(150+4)] != c[0] ||
-                //    screenBuffer[2 + x*3 + 1 + y*(150+4)] != c[1] ||
-                //    screenBuffer[2 + x*3 + 2 + y*(150+4)] != c[2])
+                //if( screenBuffer[byte_position] != c[0] ||
+                //    screenBuffer[byte_position + 1] != c[1] ||
+                //    screenBuffer[byte_position + 2] != c[2])
                 //{
                 //    lineHasChanged = 1;
-                //    byteHasChanged = 1;
+                //    byteHasChanged = 1; // !!! THIS WON'T WORK - NOT NECESSARILY CONTIGUOUS!!
                 //}
 
                 // update screen buffer
@@ -356,9 +357,9 @@ int thread_fn(void* v)
                     //screenBuffer[2 + x * 3 + 2 + y*(150+4)] = 146;    0b10010010
                     
                     // So this must be working:
-                    screenBuffer[2 + x * 3 + y*(150+4)] = c[0];
-                    screenBuffer[2 + x * 3 + 1 + y*(150+4)] = c[1];
-                    screenBuffer[2 + x * 3 + 2 + y*(150+4)] = c[2];
+                    screenBuffer[byte_position] = c[0];
+                    screenBuffer[byte_position + 1] = c[1];
+                    screenBuffer[byte_position + 2] = c[2];
                     
                     
                 //}
